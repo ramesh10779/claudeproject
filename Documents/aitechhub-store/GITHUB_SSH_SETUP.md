@@ -1,13 +1,15 @@
-# GitHub SSH Setup Documentation
+# Git SSH Setup Documentation
 
 **Date:** 2025-10-09
-**Repository:** https://github.com/ramesh10779/claudeproject.git
+**Repositories:**
+- GitHub: https://github.com/ramesh10779/claudeproject.git
+- GitLab: https://gitlab.com/ramesh10779-group/ramesh10779-project.git
 
 ---
 
 ## Overview
 
-This document describes the SSH key setup process for authenticating with GitHub to push code changes from the local development environment.
+This document describes the SSH key setup process for authenticating with GitHub and GitLab to push code changes from the local development environment.
 
 ---
 
@@ -91,6 +93,28 @@ origin  git@github.com:ramesh10779/claudeproject.git (push)
 
 ---
 
+## GitLab Configuration
+
+### Step 4: Add SSH Key to GitLab Account
+
+**Method 1: Via Direct Link**
+
+1. Navigate to: https://gitlab.com/-/profile/keys
+2. Fill in the form:
+   - **Title:** "MacBook AITechHub"
+   - **Key:** Paste the public key from above
+   - **Expiration date:** Leave blank (no expiration)
+3. Click "Add key"
+
+**Method 2: Via Settings Menu**
+
+1. Go to GitLab: https://gitlab.com
+2. Click your avatar → Settings → SSH Keys
+3. Enter title and paste key
+4. Click "Add key"
+
+---
+
 ## Testing SSH Connection
 
 ### Step 5: Test SSH Connection to GitHub
@@ -104,6 +128,17 @@ ssh -T git@github.com
 Hi ramesh10779! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
+### Step 6: Test SSH Connection to GitLab
+
+```bash
+ssh -T git@gitlab.com
+```
+
+**Expected Output:**
+```
+Welcome to GitLab, @ramesh10779!
+```
+
 ---
 
 ## File Locations
@@ -111,7 +146,7 @@ Hi ramesh10779! You've successfully authenticated, but GitHub does not provide s
 | File | Location | Purpose |
 |------|----------|---------|
 | Private Key | `~/.ssh/id_ed25519` | Secret key (never share) |
-| Public Key | `~/.ssh/id_ed25519.pub` | Public key (add to GitHub) |
+| Public Key | `~/.ssh/id_ed25519.pub` | Public key (add to GitHub/GitLab) |
 | SSH Config | `~/.ssh/config` | Optional SSH configuration |
 
 ---
