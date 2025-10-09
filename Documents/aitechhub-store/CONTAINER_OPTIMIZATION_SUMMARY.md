@@ -486,7 +486,7 @@ aitechhub-store/
 - Load & Stress Test Report
 
 **Repository:**
-- https://gitlab.com/ramesh10779-group/ramesh10779-project
+- https://github.com/ramesh10779/claudeproject
 
 ---
 

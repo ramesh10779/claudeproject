@@ -313,7 +313,7 @@ Score: 10/10 ✅ Systematic spacing
 
 ### To Deploy
 ```bash
-1. Go to GitLab: https://gitlab.com/ramesh10779-group/ramesh10779-project
+1. Go to GitLab: https://github.com/ramesh10779/claudeproject
 2. Navigate to: Settings → CI/CD → Variables
 3. Add 8 variables (see DEPLOYMENT_INFO_PAGE.md)
 4. Push any commit or manually trigger pipeline

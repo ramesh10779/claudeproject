@@ -300,7 +300,7 @@ aitechhub-store/
 
 ```bash
 # 1. Clone repository
-git clone https://gitlab.com/ramesh10779-group/ramesh10779-project.git
+git clone https://github.com/ramesh10779/claudeproject.git
 cd ramesh10779-project
 
 # 2. Configure environment
@@ -516,7 +516,7 @@ curl https://aitechhub.store
 - Admin: https://admin.aitechhub.store
 
 ### GitLab Repository
-- URL: https://gitlab.com/ramesh10779-group/ramesh10779-project
+- URL: https://github.com/ramesh10779/claudeproject
 - Branch: main
 - Latest Commit: Container optimization
 

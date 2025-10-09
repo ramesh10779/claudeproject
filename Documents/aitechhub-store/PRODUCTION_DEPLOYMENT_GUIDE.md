@@ -107,7 +107,7 @@ sudo usermod -aG docker $USER
 ### 1. Clone Repository
 
 ```bash
-git clone https://gitlab.com/ramesh10779-group/ramesh10779-project.git aitechhub-store
+git clone https://github.com/ramesh10779/claudeproject.git aitechhub-store
 cd aitechhub-store
 ```
 
@@ -624,7 +624,7 @@ redis:
 ## 📞 Support & Resources
 
 - **Documentation**: This file
-- **GitLab Repository**: https://gitlab.com/ramesh10779-group/ramesh10779-project
+- **GitLab Repository**: https://github.com/ramesh10779/claudeproject
 - **Issues**: Create issue on GitLab
 - **Security**: Report security issues privately
 
