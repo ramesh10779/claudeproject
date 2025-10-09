@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'AITechHub Store - Your Tech Marketplace')</title>
+    <title>@yield('title', 'AI Tech Hub Store - Your Tech Marketplace')</title>
 
     <style>
         * {
@@ -94,6 +94,22 @@
 
         .nav-menu a:hover {
             background: rgba(255,255,255,0.1);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: white;
+            color: #1e3c72;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: rgba(255,255,255,0.9);
         }
 
         .cart-badge {
@@ -269,22 +285,132 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            .nav-menu {
-                gap: 1rem;
-                flex-wrap: wrap;
+            .header-top {
+                font-size: 0.7rem;
+                padding: 0.3rem 0;
+            }
+
+            .header-top .container {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.25rem;
+            }
+
+            .header-main {
+                padding: 0.75rem 0;
             }
 
             .header-main .container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                font-size: 1rem;
+            }
+
+            .logo-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 1.1rem;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            nav {
+                order: 3;
+                width: 100%;
+            }
+
+            .nav-menu {
+                display: none;
                 flex-direction: column;
-                gap: 1rem;
+                width: 100%;
+                background: rgba(30, 60, 114, 0.98);
+                position: absolute;
+                top: 100%;
+                left: 0;
+                padding: 1rem 0;
+                gap: 0;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .nav-menu li {
+                width: 100%;
+                text-align: center;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+
+            .nav-menu li:last-child {
+                border-bottom: none;
+            }
+
+            .nav-menu a {
+                padding: 0.85rem 1rem;
+                display: block;
+                width: 100%;
+                font-size: 0.95rem;
+            }
+
+            .cart-badge {
+                padding: 0.85rem 1rem;
+                font-size: 0.95rem;
+                border-radius: 0;
+            }
+
+            .badge-count {
+                position: static;
+                margin-left: 0.5rem;
+                width: auto;
+                height: auto;
+                font-size: 0.8rem;
+                padding: 0.2rem 0.5rem;
             }
 
             .container {
                 padding: 0 1rem;
             }
 
+            .back-button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+            }
+
+            .footer {
+                font-size: 0.85rem;
+                padding: 2rem 0 1rem;
+            }
+
             .footer-content {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-section h3 {
+                font-size: 0.95rem;
+            }
+
+            .footer-section ul li {
+                margin-bottom: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .footer-bottom {
+                font-size: 0.75rem;
+                padding-top: 1rem;
+            }
+
+            .social-links a {
+                width: 35px;
+                height: 35px;
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -307,11 +433,15 @@
             <div class="container">
                 <a href="/" class="logo">
                     <div class="logo-icon">🛒</div>
-                    <span>AITechHub Store</span>
+                    <span>AI Tech Hub Store</span>
                 </a>
 
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                    ☰
+                </button>
+
                 <nav>
-                    <ul class="nav-menu">
+                    <ul class="nav-menu" id="navMenu">
                         <li><a href="/">Home</a></li>
                         <li><a href="/products">Products</a></li>
                         <li><a href="/products?type=subscription">Subscriptions</a></li>
@@ -362,7 +492,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>About AITechHub</h3>
+                    <h3>About AI Tech Hub</h3>
                     <p style="color: #cbd5e0; line-height: 1.6;">
                         Your trusted marketplace for cutting-edge technology products. Quality guaranteed, fast shipping, excellent customer service.
                     </p>
@@ -411,7 +541,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>© 2025 AITechHub Store. All rights reserved.</p>
+                <p>© 2025 AI Tech Hub Store. All rights reserved.</p>
                 <p style="margin-top: 0.5rem;">
                     <a href="#" style="color: #a0aec0;">Privacy Policy</a> •
                     <a href="#" style="color: #a0aec0;">Terms of Service</a> •
@@ -422,5 +552,34 @@
     </footer>
 
     @stack('scripts')
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        if (mobileMenuToggle && navMenu) {
+            mobileMenuToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+                this.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+            });
+
+            // Close menu when clicking on a link
+            navMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    navMenu.classList.remove('active');
+                    mobileMenuToggle.textContent = '☰';
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.header-main')) {
+                    navMenu.classList.remove('active');
+                    mobileMenuToggle.textContent = '☰';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
