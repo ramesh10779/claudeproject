@@ -3,28 +3,28 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('home');
+    return view('welcome');
 });
 
 // Public search endpoint (no auth required)
 Route::get('/api/search/products', [\App\Http\Controllers\ProductController::class, 'search'])->name('products.search');
+
+// Public product browsing (no auth required)
+Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products');
+Route::get('/products/{product}', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
+
+// Guest cart (no auth required - uses session)
+Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart');
+Route::post('/cart/add', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/remove/{product}', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    // Products
-    Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products');
-    Route::get('/products/{product}', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
-
-    // Cart
-    Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart');
-    Route::post('/cart/add', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
-    Route::post('/cart/remove/{product}', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
-    Route::post('/cart/clear', [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
-
-    // Checkout
+    // Checkout (requires auth)
     Route::get('/checkout', [\App\Http\Controllers\CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
 
