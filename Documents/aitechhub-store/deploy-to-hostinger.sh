@@ -1,113 +1,125 @@
 #!/bin/bash
 
-# Manual Deployment Script to Hostinger
-# Use this if you want to deploy without GitLab CI/CD
+# ============================================
+# AITechHub Store - Hostinger Deployment
+# ============================================
+# Deploy production containers to Hostinger server
+# Last Updated: 2025-10-09
 
-echo "========================================"
-echo "AITechHub Store - Hostinger Deployment"
-echo "========================================"
+set -e
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Hostinger server details
+HOSTINGER_IP="72.60.238.18"
+HOSTINGER_PORT="65002"
+HOSTINGER_USER="u631122123"
+DOMAIN="aitechhub.store"
+PASSWORD="Sasinikhilesh\$03"
+
+echo -e "${BLUE}============================================${NC}"
+echo -e "${BLUE}  AITechHub Store - Hostinger Deployment${NC}"
+echo -e "${BLUE}============================================${NC}"
 echo ""
 
-# Configuration (update these)
-FTP_HOST="72.60.238.18"  # or use: aitechhub.store
-FTP_USER="u631122123.aitechhub.store"
-FTP_PASS="your_password_here"
-FTP_DIR="/public_html"
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
 
-echo "⚠️  WARNING: Update FTP credentials in this script before running!"
-echo ""
-read -p "Have you updated FTP credentials? (yes/no): " CONFIRMED
+print_warning() {
+    echo -e "${YELLOW}⚠ $1${NC}"
+}
 
-if [ "$CONFIRMED" != "yes" ]; then
-    echo "❌ Please update FTP_HOST, FTP_USER, and FTP_PASS in this script"
-    exit 1
-fi
+print_error() {
+    echo -e "${RED}✗ $1${NC}"
+}
 
-echo ""
-echo "Step 1: Building customer app..."
-cd customer
+print_info() {
+    echo -e "${BLUE}ℹ $1${NC}"
+}
 
-# Install dependencies
-echo "Installing Composer dependencies..."
-composer install --no-dev --optimize-autoloader --no-interaction
-
-echo "Installing NPM dependencies..."
-npm ci
-
-echo "Building frontend assets..."
-npm run build
-
-echo "✅ Build complete!"
-echo ""
-
-# Create deployment package (exclude unnecessary files)
-echo "Step 2: Creating deployment package..."
-cd ..
-mkdir -p deploy
-rsync -av --exclude='.git' \
-          --exclude='node_modules' \
-          --exclude='tests' \
-          --exclude='storage/logs/*' \
-          --exclude='storage/framework/cache/*' \
-          --exclude='.env' \
-          customer/ deploy/
-
-echo "✅ Deployment package ready!"
-echo ""
-
-# Deploy via FTP
-echo "Step 3: Uploading to Hostinger via FTP..."
-echo "This may take several minutes..."
-echo ""
-
-if ! command -v lftp &> /dev/null; then
-    echo "⚠️  LFTP not found. Installing..."
-
-    # Check OS
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        brew install lftp
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        sudo apt-get update && sudo apt-get install -y lftp
-    else
-        echo "❌ Please install LFTP manually: https://lftp.yar.ru/"
-        exit 1
-    fi
-fi
-
-# Upload via LFTP
-lftp -u $FTP_USER,$FTP_PASS -e "
-set ftp:ssl-allow no;
-set ssl:verify-certificate no;
-open $FTP_HOST;
-mirror --reverse --delete --verbose --exclude .git/ --exclude storage/logs/ deploy/ $FTP_DIR/;
-bye
-"
-
-if [ $? -eq 0 ]; then
-    echo "✅ Upload complete!"
+# ============================================
+# Step 1: Test SSH Connection
+# ============================================
+echo "Step 1: Testing SSH connection to Hostinger..."
+if sshpass -p "$PASSWORD" ssh -p $HOSTINGER_PORT -o StrictHostKeyChecking=no -o ConnectTimeout=10 \
+    $HOSTINGER_USER@$HOSTINGER_IP "echo 'SSH connection successful'" 2>/dev/null; then
+    print_success "SSH connection established"
 else
-    echo "❌ Upload failed. Check your FTP credentials."
+    print_error "Failed to connect to Hostinger server"
+    echo "Please check your SSH credentials"
     exit 1
 fi
-
-echo ""
-echo "========================================"
-echo "🎉 Deployment Successful!"
-echo "========================================"
-echo ""
-echo "Next steps:"
-echo "1. Upload .env file manually to /public_html/.env"
-echo "2. In Hostinger control panel, set document root to: /public_html/public"
-echo "3. SSH to Hostinger and run:"
-echo "   cd /public_html"
-echo "   php artisan migrate --force"
-echo "   php artisan config:cache"
-echo "   php artisan route:cache"
-echo ""
-echo "Your site should be live at: https://aitechhub.store"
 echo ""
 
-# Cleanup
-rm -rf deploy
+# ============================================
+# Step 2: Check Server Requirements
+# ============================================
+echo "Step 2: Checking server requirements..."
+
+sshpass -p "$PASSWORD" ssh -p $HOSTINGER_PORT $HOSTINGER_USER@$HOSTINGER_IP << 'ENDSSH'
+echo "Checking Docker installation..."
+if command -v docker &> /dev/null; then
+    echo "✓ Docker is installed: $(docker --version)"
+else
+    echo "✗ Docker is NOT installed"
+    echo "Installing Docker..."
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+fi
+
+echo "Checking Docker Compose..."
+if command -v docker-compose &> /dev/null; then
+    echo "✓ Docker Compose is installed: $(docker-compose --version)"
+else
+    echo "✗ Docker Compose is NOT installed"
+    echo "Installing Docker Compose..."
+    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+fi
+
+echo "Checking Git..."
+if command -v git &> /dev/null; then
+    echo "✓ Git is installed: $(git --version)"
+else
+    echo "✗ Git is NOT installed"
+    echo "Installing Git..."
+    apt-get update && apt-get install -y git
+fi
+ENDSSH
+
+print_success "Server requirements checked"
+echo ""
+
+# ============================================
+# Step 3: Clone/Update Repository
+# ============================================
+echo "Step 3: Deploying code to server..."
+
+sshpass -p "$PASSWORD" ssh -p $HOSTINGER_PORT $HOSTINGER_USER@$HOSTINGER_IP << 'ENDSSH'
+REPO_DIR="/home/u631122123/aitechhub-store"
+
+if [ -d "$REPO_DIR" ]; then
+    echo "Repository exists, pulling latest changes..."
+    cd "$REPO_DIR"
+    git fetch origin
+    git reset --hard origin/main
+    git pull origin main
+else
+    echo "Cloning repository..."
+    git clone https://github.com/ramesh10779/claudeproject.git "$REPO_DIR"
+fi
+
+echo "✓ Code deployed to server"
+ENDSSH
+
+print_success "Code deployed to server"
+echo ""
+
+print_success "Deployment completed!"
+echo ""
