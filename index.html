@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multi‑Stage Config Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="brand-text">
+          <h1>Config Manager</h1>
+          <span>Enterprise Environment Configuration</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="newConfigBtn" class="btn primary">New Config</button>
+        <button id="openConfigBtn" class="btn">Open YAML</button>
+        <input type="file" id="openFileInput" accept=".yaml,.yml,text/yaml" hidden />
+        <button id="openXmlBtn" class="btn">Open XML</button>
+        <input type="file" id="openXmlFileInput" accept=".xml,text/xml,application/xml" hidden />
+        <button id="exportConfigBtn" class="btn success">Export YAML</button>
+        <button id="exportXmlBtn" class="btn">Export XML</button>
+        <a id="helpLink" class="btn" href="knowledgebase.html">Knowledge Base</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Environment Navigation">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Environments</span>
+          <span class="sidebar-subtitle">Development, QA, Staging, Production</span>
+        </div>
+        <nav id="envTabs" class="tabs" aria-label="Environment Tabs"></nav>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Quick Actions</div>
+          <div class="sidebar-actions">
+            <button id="sidebarNewConfigBtn" class="btn">New</button>
+            <button id="sidebarOpenConfigBtn" class="btn">Open</button>
+            <button id="sidebarExportConfigBtn" class="btn">Export</button>
+            <button id="sidebarExportXmlBtn" class="btn">Export XML</button>
+            <button id="sidebarAddPairBtn" class="btn">Add Pair</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Environment Tools</div>
+          <div class="sidebar-actions">
+            <button id="addEnvBtn" class="btn">Add Env</button>
+            <button id="deleteEnvBtn" class="btn danger">Delete Env</button>
+            <button id="duplicateEnvBtn" class="btn">Duplicate</button>
+            <button id="sortEnvBtn" class="btn">Sort A→Z</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <!-- Rich Landing Hero -->
+        <section class="hero">
+          <div class="hero-inner">
+            <div class="hero-copy">
+              <h1>Design, manage, and export environment configs</h1>
+              <p>Streamline multi‑stage configuration across Dev, QA, Staging, and Production with a polished, enterprise UI.</p>
+              <div class="hero-actions">
+                <button id="getStartedBtn" class="btn primary">Get Started</button>
+                <button id="quickOpenBtn" class="btn">Open YAML</button>
+                <button id="quickExportBtn" class="btn">Export</button>
+                <button id="quickAddPairBtn" class="btn ghost">Add Key‑Value</button>
+              </div>
+            </div>
+            <div class="hero-visual">
+              <div class="visual-card">
+                <div class="visual-header">Active Environment</div>
+                <div class="visual-body">
+                  <div class="visual-env" id="visualActiveEnv">Development</div>
+                  <div class="visual-stats">
+                    <div class="stat">
+                      <div class="stat-label">Keys</div>
+                      <div class="stat-value" id="visualKeyCount">0</div>
+                    </div>
+                    <div class="stat">
+                      <div class="stat-label">Envs</div>
+                      <div class="stat-value" id="visualEnvCount">4</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="env-badges" id="envBadges"></div>
+        </section>
+        <section class="card editor">
+          <div class="card-header editor-header">
+            <h2 id="editorTitle">Environment: <span id="activeEnvLabel"></span></h2>
+            <div class="editor-actions">
+              <button id="addPairBtn" class="btn">Add Pair</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="kv-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pairsTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      <span id="statusText">Ready.</span>
+    </footer>
+
+
+    <script src="config-ui.js"></script>
+  </body>
+</html>

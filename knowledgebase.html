@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Config Manager — Knowledge Base</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="brand-text">
+          <h1>Knowledge Base</h1>
+          <span>Usage, shortcuts, and YAML format</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <a class="btn" href="index.html">Back to App</a>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card">
+        <div class="card-header">
+          <h2>Standard Usage</h2>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li>Select environments from the sidebar in the app.</li>
+            <li>Double‑click an environment to rename; duplicates are prevented.</li>
+            <li>Add key/value rows with Add Pair; use Trash to remove.</li>
+            <li>Open YAML imports a file in the exported structure.</li>
+            <li>Export YAML downloads the current configuration as <code>config.yaml</code>.</li>
+            <li>New Config restores the four defaults: Development, QA, Staging, Production.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Keyboard Shortcuts</h2>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li><code>Cmd/Ctrl + N</code> — New Config</li>
+            <li><code>Cmd/Ctrl + O</code> — Open YAML</li>
+            <li><code>Cmd/Ctrl + E</code> — Export YAML</li>
+            <li><code>Cmd/Ctrl + Enter</code> — Add Pair</li>
+            <li><code>Alt + ↑ / ↓</code> — Switch environment</li>
+            <li><code>?</code> — Open this Knowledge Base</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>YAML Format</h2>
+        </div>
+        <div class="card-body">
+          <pre><code>environments:
+  Development:
+    API_URL: "https://dev.example.com"
+    FEATURE_FLAG: "true"
+  QA:
+    API_URL: "https://qa.example.com"
+  Staging:
+    API_URL: "https://staging.example.com"
+  Production:
+    API_URL: "https://api.example.com"</code></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Best Practices</h2>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li>Keep environment names consistent across teams and pipelines.</li>
+            <li>Use clear, descriptive keys; avoid secrets in exported files.</li>
+            <li>Store exported YAML under version control with reviews.</li>
+            <li>Validate URLs and flags before deploying changes.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
