@@ -351,11 +351,10 @@ function parseGeneratedXML(text) {
     // Only consider explicit key/value-bearing tags; avoid container tags like <parameters>
     Array.from(envNode.querySelectorAll("pair, parameter, param")).forEach((kvNode) => {
       const lower = kvNode.tagName.toLowerCase();
-      let key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]) || kvNode.tagName;
-      // Consider scope-value/name attributes for <parameter>
-      if ((!key || key.trim() === "") && (lower === "parameter" || lower === "param")) {
-        key = kvNode.getAttribute("scope-value") || kvNode.getAttribute("scope-id") || kvNode.getAttribute("name") || kvNode.getAttribute("id") || key;
-      }
+      const keyAttr = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]);
+      const nameAttr = kvNode.getAttribute("scope-value") || kvNode.getAttribute("scope-id") || kvNode.getAttribute("name") || kvNode.getAttribute("id");
+      // Prefer attribute-derived names for <parameter>/<param> over tagName to avoid overwrites
+      let key = keyAttr || ((lower === "parameter" || lower === "param") ? nameAttr : null) || kvNode.tagName;
       let val = kvNode.getAttribute("value")
         || getText(kvNode.getElementsByTagName("value")[0])
         || getText(kvNode);
@@ -369,11 +368,9 @@ function parseGeneratedXML(text) {
           const childValAttr = childParam.getAttribute("value");
           const childKeyEl = childParam.getElementsByTagName("key")[0];
           const childValEl = childParam.getElementsByTagName("value")[0];
-          key = childKeyAttr || getText(childKeyEl) || key;
+          const childNameAttr = childParam.getAttribute("scope-value") || childParam.getAttribute("scope-id") || childParam.getAttribute("name") || childParam.getAttribute("id");
+          key = childKeyAttr || getText(childKeyEl) || ((childParam.tagName.toLowerCase() === "parameter" || childParam.tagName.toLowerCase() === "param") ? childNameAttr : null) || key;
           val = childValAttr || getText(childValEl) || val;
-          if ((!key || key.trim() === "") && (childParam.tagName.toLowerCase() === "parameter" || childParam.tagName.toLowerCase() === "param")) {
-            key = childParam.getAttribute("scope-value") || childParam.getAttribute("scope-id") || childParam.getAttribute("name") || childParam.getAttribute("id") || key;
-          }
         }
       }
       if (!key || key.trim() === "") return;

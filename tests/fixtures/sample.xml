@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <dovetailManagement>
+    <parameters>
+      <parameter scope-value="AvailableServicesClass">
+        <value>com.dovetailsys.payment.AvailableServices</value>
+      </parameter>
+      <parameter scope-value="ObjectNameMaker">
+        <value>com.dovetailsys.naming.ObjectNameMaker</value>
+      </parameter>
+      <parameter scope-value="JMXServiceURLProtocol">
+        <value>rmi</value>
+      </parameter>
+      <parameter scope-id="ServiceNames">
+        <value>{"AD","Utility","Billing"}</value>
+      </parameter>
+    </parameters>
+  </dovetailManagement>
+  <managedInstance scope-value="EnvironmentCheck">
+    <parameters>
+      <parameter scope-id="HealthCheckInterval">
+        <value>30</value>
+      </parameter>
+      <parameter name="HeartbeatEndpoint">
+        <value>https://example.com/heartbeat</value>
+      </parameter>
+    </parameters>
+  </managedInstance>
+</config>

@@ -1,0 +1,11 @@
+{
+  "name": "multistageconfigfile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

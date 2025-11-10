@@ -144,12 +144,16 @@
         envOrder.push(name); envConfigs[name] = {};
         const pairs = Array.from(envEl.querySelectorAll('pair, parameter, param'));
         pairs.forEach(p => {
-          let key = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]) || p.getAttribute('scope-value') || p.getAttribute('scope-id') || p.getAttribute('name') || p.getAttribute('id') || 'KEY';
+          const keyAttr = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]);
+          const nameAttr = p.getAttribute('scope-value') || p.getAttribute('scope-id') || p.getAttribute('name') || p.getAttribute('id');
+          let key = keyAttr || ((p.tagName.toLowerCase() === 'parameter' || p.tagName.toLowerCase() === 'param') ? nameAttr : null) || 'KEY';
           let value = p.getAttribute('value') || getText(p.getElementsByTagName('value')[0]) || getText(p);
           if (!key || key === '') {
             const child = p.querySelector('parameter, pair, param');
             if (child) {
-              key = child.getAttribute('key') || getText(child.getElementsByTagName('key')[0]) || child.getAttribute('scope-value') || child.getAttribute('scope-id') || child.getAttribute('name') || child.getAttribute('id') || key;
+              const ckAttr = child.getAttribute('key') || getText(child.getElementsByTagName('key')[0]);
+              const cnAttr = child.getAttribute('scope-value') || child.getAttribute('scope-id') || child.getAttribute('name') || child.getAttribute('id');
+              key = ckAttr || ((child.tagName.toLowerCase() === 'parameter' || child.tagName.toLowerCase() === 'param') ? cnAttr : null) || key;
               value = child.getAttribute('value') || getText(child.getElementsByTagName('value')[0]) || value;
             }
           }
@@ -167,7 +171,9 @@
         envName = (envName || '').trim(); if (!envName) return;
         if (!envConfigs[envName]) { envConfigs[envName] = {}; envOrder.push(envName); }
         Array.from(node.querySelectorAll('pair, parameter, param')).forEach(p => {
-          let key = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]) || p.getAttribute('scope-value') || p.getAttribute('scope-id') || p.getAttribute('name') || p.getAttribute('id') || p.tagName;
+          const keyAttr = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]);
+          const nameAttr = p.getAttribute('scope-value') || p.getAttribute('scope-id') || p.getAttribute('name') || p.getAttribute('id');
+          let key = keyAttr || ((p.tagName.toLowerCase() === 'parameter' || p.tagName.toLowerCase() === 'param') ? nameAttr : null) || p.tagName;
           let value = p.getAttribute('value') || getText(p.getElementsByTagName('value')[0]) || getText(p);
           if (key) envConfigs[envName][key] = value || '';
         });
@@ -176,7 +182,9 @@
           const miName = (mi.getAttribute('scope-value') || mi.getAttribute('scope-id') || mi.getAttribute('name') || mi.getAttribute('id') || 'managedInstance').trim();
           if (!envConfigs[miName]) { envConfigs[miName] = {}; envOrder.push(miName); }
           Array.from(mi.querySelectorAll('pair, parameter, param')).forEach(p => {
-            let key = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]) || p.getAttribute('scope-value') || p.getAttribute('scope-id') || p.getAttribute('name') || p.getAttribute('id') || p.tagName;
+            const keyAttr = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]);
+            const nameAttr = p.getAttribute('scope-value') || p.getAttribute('scope-id') || p.getAttribute('name') || p.getAttribute('id');
+            let key = keyAttr || ((p.tagName.toLowerCase() === 'parameter' || p.tagName.toLowerCase() === 'param') ? nameAttr : null) || p.tagName;
             let value = p.getAttribute('value') || getText(p.getElementsByTagName('value')[0]) || getText(p);
             if (key) envConfigs[miName][key] = value || '';
           });
