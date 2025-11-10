@@ -350,9 +350,27 @@ function parseGeneratedXML(text) {
       let key = kvNode.tagName;
       let val = getText(kvNode);
       // Support <pair key="" value=""/> or nested <pair><key/><value/></pair>
-      if (lower === "pair") {
+      // Also support <parameter> or <param> with same attribute/child semantics.
+      if (lower === "pair" || lower === "parameter" || lower === "param") {
         key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]);
         val = kvNode.getAttribute("value") || getText(kvNode.getElementsByTagName("value")[0]);
+        // Fallback: if current <parameter>/<pair> node lacks key/value, inspect first child <parameter>/<pair>
+        if ((!key || key.trim() === "") || (val == null || val === "")) {
+          const childParam = kvNode.getElementsByTagName("parameter")[0]
+            || kvNode.getElementsByTagName("pair")[0]
+            || kvNode.getElementsByTagName("param")[0];
+          if (childParam) {
+            const cLower = childParam.tagName.toLowerCase();
+            if (cLower === "pair" || cLower === "parameter" || cLower === "param") {
+              const childKeyAttr = childParam.getAttribute("key");
+              const childValAttr = childParam.getAttribute("value");
+              const childKeyEl = childParam.getElementsByTagName("key")[0];
+              const childValEl = childParam.getElementsByTagName("value")[0];
+              key = childKeyAttr || getText(childKeyEl) || key;
+              val = childValAttr || getText(childValEl) || val;
+            }
+          }
+        }
       }
       if (!key || key.trim() === "") return;
       envs[envName][key.trim()] = val;

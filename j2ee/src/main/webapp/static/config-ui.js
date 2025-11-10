@@ -138,8 +138,36 @@
     envs.forEach(envEl => {
       const name = envEl.getAttribute('name') || 'Environment';
       envOrder.push(name); envConfigs[name] = {};
-      const pairs = Array.from(envEl.getElementsByTagName('pair'));
-      pairs.forEach(p => { envConfigs[name][p.getAttribute('key') || 'KEY'] = p.getAttribute('value') || ''; });
+      const pairs = Array.from(envEl.getElementsByTagName('pair'))
+        .concat(Array.from(envEl.getElementsByTagName('parameter')))
+        .concat(Array.from(envEl.getElementsByTagName('param')));
+      pairs.forEach(p => {
+        let key = p.getAttribute('key');
+        let value = p.getAttribute('value');
+        if (!key) {
+          const kEl = p.getElementsByTagName('key')[0];
+          key = kEl ? (kEl.textContent || '').trim() : '';
+        }
+        if (value == null || value === '') {
+          const vEl = p.getElementsByTagName('value')[0];
+          value = vEl ? (vEl.textContent || '').trim() : '';
+        }
+        // Fallback: if current node lacks key/value, inspect first child <parameter>/<pair>/<param>
+        if (!key || key === '' || value == null || value === '') {
+          const child = p.getElementsByTagName('parameter')[0]
+            || p.getElementsByTagName('pair')[0]
+            || p.getElementsByTagName('param')[0];
+          if (child) {
+            const ck = child.getAttribute('key');
+            const cv = child.getAttribute('value');
+            const ckEl = child.getElementsByTagName('key')[0];
+            const cvEl = child.getElementsByTagName('value')[0];
+            key = ck || (ckEl ? (ckEl.textContent || '').trim() : key);
+            value = cv || (cvEl ? (cvEl.textContent || '').trim() : value);
+          }
+        }
+        if (key && key !== '') { envConfigs[name][key] = value || ''; }
+      });
     });
     state.envOrder = envOrder.length ? envOrder : ["Development"]; state.envConfigs = envConfigs; state.activeEnv = state.envOrder[0];
     renderAll(); setStatus('XML loaded.');
