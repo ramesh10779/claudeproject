@@ -1,6 +1,16 @@
 # Multi-Stage Config Manager
 
+[![Stars](https://img.shields.io/github/stars/ramesh10779/claudeproject?style=social)](https://github.com/ramesh10779/claudeproject)
+![Client](https://img.shields.io/badge/Client-HTML%2FCSS%20%2B%20JS-yellow)
+![Server](https://img.shields.io/badge/J2EE-WAR-blue)
+![Status](https://img.shields.io/badge/Status-Active-success)
+
 A simple, clean app to manage environment-based configuration pairs (keys/values) across multiple stages (Development, Staging, Production, etc.). It supports importing from YAML/XML, editing in the browser, switching environments quickly, and exporting to YAML/XML — either client-side or via J2EE servlets.
+
+## TL;DR (Getting Started)
+- Open `index.html` directly in a modern browser, or run `python3 -m http.server 8000` and visit `http://localhost:8000/`.
+- Add environments, edit key/value pairs, import `.yaml/.yml` or `.xml`, then export YAML/XML.
+- J2EE: `cd j2ee && mvn -DskipTests package` → deploy the WAR in Tomcat (`webapps/`).
 
 ## Features
 - Manage environments: add, delete, duplicate, sort A→Z
