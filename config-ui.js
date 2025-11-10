@@ -341,19 +341,20 @@ function parseGeneratedXML(text) {
     if (tagLower === "environment") {
       envName = envNode.getAttribute("name") || envNode.getAttribute("id") || envNode.getAttribute("env") || "Environment";
     } else if (tagLower === "managedinstance") {
-      envName = envNode.getAttribute("scope-value") || envNode.getAttribute("name") || envName;
+      envName = envNode.getAttribute("scope-value") || envNode.getAttribute("scope-id") || envNode.getAttribute("name") || envName;
     }
     if (!envName || envName.trim() === "") return;
     envName = envName.trim();
     if (!(envName in envs)) { envs[envName] = {}; order.push(envName); }
 
     // Collect parameters and pairs anywhere under this node
+    // Only consider explicit key/value-bearing tags; avoid container tags like <parameters>
     Array.from(envNode.querySelectorAll("pair, parameter, param")).forEach((kvNode) => {
       const lower = kvNode.tagName.toLowerCase();
       let key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]) || kvNode.tagName;
       // Consider scope-value/name attributes for <parameter>
       if ((!key || key.trim() === "") && (lower === "parameter" || lower === "param")) {
-        key = kvNode.getAttribute("scope-value") || kvNode.getAttribute("name") || key;
+        key = kvNode.getAttribute("scope-value") || kvNode.getAttribute("scope-id") || kvNode.getAttribute("name") || kvNode.getAttribute("id") || key;
       }
       let val = kvNode.getAttribute("value")
         || getText(kvNode.getElementsByTagName("value")[0])
@@ -371,7 +372,7 @@ function parseGeneratedXML(text) {
           key = childKeyAttr || getText(childKeyEl) || key;
           val = childValAttr || getText(childValEl) || val;
           if ((!key || key.trim() === "") && (childParam.tagName.toLowerCase() === "parameter" || childParam.tagName.toLowerCase() === "param")) {
-            key = childParam.getAttribute("scope-value") || childParam.getAttribute("name") || key;
+            key = childParam.getAttribute("scope-value") || childParam.getAttribute("scope-id") || childParam.getAttribute("name") || childParam.getAttribute("id") || key;
           }
         }
       }
@@ -381,10 +382,10 @@ function parseGeneratedXML(text) {
 
     // Create separate environments for nested managedInstance elements
     Array.from(envNode.getElementsByTagName("managedInstance")).forEach((mi) => {
-      const miName = (mi.getAttribute("scope-value") || mi.getAttribute("name") || "managedInstance").trim();
+      const miName = (mi.getAttribute("scope-value") || mi.getAttribute("scope-id") || mi.getAttribute("name") || mi.getAttribute("id") || "managedInstance").trim();
       if (!(miName in envs)) { envs[miName] = {}; order.push(miName); }
       Array.from(mi.querySelectorAll("pair, parameter, param")).forEach((kvNode) => {
-        let key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]) || kvNode.getAttribute("scope-value") || kvNode.getAttribute("name") || kvNode.tagName;
+        let key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]) || kvNode.getAttribute("scope-value") || kvNode.getAttribute("scope-id") || kvNode.getAttribute("name") || kvNode.getAttribute("id") || kvNode.tagName;
         let val = kvNode.getAttribute("value") || getText(kvNode.getElementsByTagName("value")[0]) || getText(kvNode);
         if (!key || key.trim() === "") return;
         envs[miName][key.trim()] = val;
