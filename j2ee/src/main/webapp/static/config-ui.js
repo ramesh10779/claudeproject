@@ -133,42 +133,57 @@
   function openXML() { const f = el('xmlFileInput'); if (!f) return; f.click(); }
   function parseGeneratedXML(text) {
     const parser = new DOMParser(); const xml = parser.parseFromString(text, 'text/xml');
-    const envs = Array.from(xml.getElementsByTagName('environment'));
+    let envEls = Array.from(xml.getElementsByTagName('environment'));
     const envOrder = []; const envConfigs = {};
-    envs.forEach(envEl => {
-      const name = envEl.getAttribute('name') || 'Environment';
-      envOrder.push(name); envConfigs[name] = {};
-      const pairs = Array.from(envEl.getElementsByTagName('pair'))
-        .concat(Array.from(envEl.getElementsByTagName('parameter')))
-        .concat(Array.from(envEl.getElementsByTagName('param')));
-      pairs.forEach(p => {
-        let key = p.getAttribute('key');
-        let value = p.getAttribute('value');
-        if (!key) {
-          const kEl = p.getElementsByTagName('key')[0];
-          key = kEl ? (kEl.textContent || '').trim() : '';
-        }
-        if (value == null || value === '') {
-          const vEl = p.getElementsByTagName('value')[0];
-          value = vEl ? (vEl.textContent || '').trim() : '';
-        }
-        // Fallback: if current node lacks key/value, inspect first child <parameter>/<pair>/<param>
-        if (!key || key === '' || value == null || value === '') {
-          const child = p.getElementsByTagName('parameter')[0]
-            || p.getElementsByTagName('pair')[0]
-            || p.getElementsByTagName('param')[0];
-          if (child) {
-            const ck = child.getAttribute('key');
-            const cv = child.getAttribute('value');
-            const ckEl = child.getElementsByTagName('key')[0];
-            const cvEl = child.getElementsByTagName('value')[0];
-            key = ck || (ckEl ? (ckEl.textContent || '').trim() : key);
-            value = cv || (cvEl ? (cvEl.textContent || '').trim() : value);
+    const getText = (el) => (el && el.textContent ? el.textContent.trim() : '');
+
+    if (envEls.length) {
+      // Standard format
+      envEls.forEach(envEl => {
+        const name = envEl.getAttribute('name') || 'Environment';
+        envOrder.push(name); envConfigs[name] = {};
+        const pairs = Array.from(envEl.querySelectorAll('pair, parameter, param'));
+        pairs.forEach(p => {
+          let key = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]) || p.getAttribute('scope-value') || p.getAttribute('name') || 'KEY';
+          let value = p.getAttribute('value') || getText(p.getElementsByTagName('value')[0]) || getText(p);
+          if (!key || key === '') {
+            const child = p.querySelector('parameter, pair, param');
+            if (child) {
+              key = child.getAttribute('key') || getText(child.getElementsByTagName('key')[0]) || child.getAttribute('scope-value') || child.getAttribute('name') || key;
+              value = child.getAttribute('value') || getText(child.getElementsByTagName('value')[0]) || value;
+            }
           }
-        }
-        if (key && key !== '') { envConfigs[name][key] = value || ''; }
+          if (key && key !== '') { envConfigs[name][key] = value || ''; }
+        });
       });
-    });
+    } else {
+      // Fallback: build environments from top-level nodes and managedInstance elements
+      const root = xml.documentElement;
+      Array.from(root.children).forEach(node => {
+        let envName = node.tagName;
+        if (node.tagName.toLowerCase() === 'managedinstance') {
+          envName = node.getAttribute('scope-value') || node.getAttribute('name') || envName;
+        }
+        envName = (envName || '').trim(); if (!envName) return;
+        if (!envConfigs[envName]) { envConfigs[envName] = {}; envOrder.push(envName); }
+        Array.from(node.querySelectorAll('pair, parameter, param')).forEach(p => {
+          let key = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]) || p.getAttribute('scope-value') || p.getAttribute('name') || p.tagName;
+          let value = p.getAttribute('value') || getText(p.getElementsByTagName('value')[0]) || getText(p);
+          if (key) envConfigs[envName][key] = value || '';
+        });
+        // Nested managedInstance environments
+        Array.from(node.getElementsByTagName('managedInstance')).forEach(mi => {
+          const miName = (mi.getAttribute('scope-value') || mi.getAttribute('name') || 'managedInstance').trim();
+          if (!envConfigs[miName]) { envConfigs[miName] = {}; envOrder.push(miName); }
+          Array.from(mi.querySelectorAll('pair, parameter, param')).forEach(p => {
+            let key = p.getAttribute('key') || getText(p.getElementsByTagName('key')[0]) || p.getAttribute('scope-value') || p.getAttribute('name') || p.tagName;
+            let value = p.getAttribute('value') || getText(p.getElementsByTagName('value')[0]) || getText(p);
+            if (key) envConfigs[miName][key] = value || '';
+          });
+        });
+      });
+    }
+
     state.envOrder = envOrder.length ? envOrder : ["Development"]; state.envConfigs = envConfigs; state.activeEnv = state.envOrder[0];
     renderAll(); setStatus('XML loaded.');
   }

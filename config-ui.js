@@ -340,40 +340,55 @@ function parseGeneratedXML(text) {
     const tagLower = envNode.tagName.toLowerCase();
     if (tagLower === "environment") {
       envName = envNode.getAttribute("name") || envNode.getAttribute("id") || envNode.getAttribute("env") || "Environment";
+    } else if (tagLower === "managedinstance") {
+      envName = envNode.getAttribute("scope-value") || envNode.getAttribute("name") || envName;
     }
     if (!envName || envName.trim() === "") return;
     envName = envName.trim();
     if (!(envName in envs)) { envs[envName] = {}; order.push(envName); }
 
-    Array.from(envNode.children).forEach((kvNode) => {
+    // Collect parameters and pairs anywhere under this node
+    Array.from(envNode.querySelectorAll("pair, parameter, param")).forEach((kvNode) => {
       const lower = kvNode.tagName.toLowerCase();
-      let key = kvNode.tagName;
-      let val = getText(kvNode);
-      // Support <pair key="" value=""/> or nested <pair><key/><value/></pair>
-      // Also support <parameter> or <param> with same attribute/child semantics.
-      if (lower === "pair" || lower === "parameter" || lower === "param") {
-        key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]);
-        val = kvNode.getAttribute("value") || getText(kvNode.getElementsByTagName("value")[0]);
-        // Fallback: if current <parameter>/<pair> node lacks key/value, inspect first child <parameter>/<pair>
-        if ((!key || key.trim() === "") || (val == null || val === "")) {
-          const childParam = kvNode.getElementsByTagName("parameter")[0]
-            || kvNode.getElementsByTagName("pair")[0]
-            || kvNode.getElementsByTagName("param")[0];
-          if (childParam) {
-            const cLower = childParam.tagName.toLowerCase();
-            if (cLower === "pair" || cLower === "parameter" || cLower === "param") {
-              const childKeyAttr = childParam.getAttribute("key");
-              const childValAttr = childParam.getAttribute("value");
-              const childKeyEl = childParam.getElementsByTagName("key")[0];
-              const childValEl = childParam.getElementsByTagName("value")[0];
-              key = childKeyAttr || getText(childKeyEl) || key;
-              val = childValAttr || getText(childValEl) || val;
-            }
+      let key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]) || kvNode.tagName;
+      // Consider scope-value/name attributes for <parameter>
+      if ((!key || key.trim() === "") && (lower === "parameter" || lower === "param")) {
+        key = kvNode.getAttribute("scope-value") || kvNode.getAttribute("name") || key;
+      }
+      let val = kvNode.getAttribute("value")
+        || getText(kvNode.getElementsByTagName("value")[0])
+        || getText(kvNode);
+      // Fallback: inspect first child parameter/pair if missing
+      if ((!key || key.trim() === "") || (val == null || val === "")) {
+        const childParam = kvNode.getElementsByTagName("parameter")[0]
+          || kvNode.getElementsByTagName("pair")[0]
+          || kvNode.getElementsByTagName("param")[0];
+        if (childParam) {
+          const childKeyAttr = childParam.getAttribute("key");
+          const childValAttr = childParam.getAttribute("value");
+          const childKeyEl = childParam.getElementsByTagName("key")[0];
+          const childValEl = childParam.getElementsByTagName("value")[0];
+          key = childKeyAttr || getText(childKeyEl) || key;
+          val = childValAttr || getText(childValEl) || val;
+          if ((!key || key.trim() === "") && (childParam.tagName.toLowerCase() === "parameter" || childParam.tagName.toLowerCase() === "param")) {
+            key = childParam.getAttribute("scope-value") || childParam.getAttribute("name") || key;
           }
         }
       }
       if (!key || key.trim() === "") return;
       envs[envName][key.trim()] = val;
+    });
+
+    // Create separate environments for nested managedInstance elements
+    Array.from(envNode.getElementsByTagName("managedInstance")).forEach((mi) => {
+      const miName = (mi.getAttribute("scope-value") || mi.getAttribute("name") || "managedInstance").trim();
+      if (!(miName in envs)) { envs[miName] = {}; order.push(miName); }
+      Array.from(mi.querySelectorAll("pair, parameter, param")).forEach((kvNode) => {
+        let key = kvNode.getAttribute("key") || getText(kvNode.getElementsByTagName("key")[0]) || kvNode.getAttribute("scope-value") || kvNode.getAttribute("name") || kvNode.tagName;
+        let val = kvNode.getAttribute("value") || getText(kvNode.getElementsByTagName("value")[0]) || getText(kvNode);
+        if (!key || key.trim() === "") return;
+        envs[miName][key.trim()] = val;
+      });
     });
   });
   return { envs, order };
